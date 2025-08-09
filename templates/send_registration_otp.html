@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .otp {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 14px;
+      color: #6c757d;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="text-center mb-4">
+      <h1 class="text-primary">Welcome to Think Battleground</h1>
+    </div>
+    <div>
+      <p>Hello {{.Username}},</p>
+      <p>
+        {{.Message}}
+      </p>
+      <div class="otp">{{.OTP}}</div>
+      <p>If you didn’t request this, you can safely ignore this email.</p>
+      <p>Thank you,<br />The Think Battleground Team</p>
+    </div>
+    <div class="footer">
+      <p>&copy; 2025 Think Battleground. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+
+</html>
