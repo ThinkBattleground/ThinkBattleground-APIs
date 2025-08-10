@@ -13,16 +13,6 @@ import (
 func validation(w http.ResponseWriter, user models.Users) bool {
 	ok := true
 
-	if len(user.FirstName) == 0 {
-		config.WriteResponse(w, http.StatusBadRequest, "First Name must be not empty")
-		ok = false
-	}
-
-	if len(user.LastName) == 0 {
-		config.WriteResponse(w, http.StatusBadRequest, "Last Name must be not empty")
-		ok = false
-	}
-
 	// checking whether genre is valid
 	flag := checkStringInSlice(validRole, user.Role)
 	if !flag {

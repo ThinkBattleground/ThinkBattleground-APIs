@@ -15,42 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/users": {
-            "get": {
-                "description": "Get all users from the database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "List all users",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.UserGetResponse"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/users/forgot-password": {
+        "/user/forgot-password": {
             "post": {
                 "description": "Send OTP for password reset",
                 "consumes": [
@@ -96,7 +61,99 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/login": {
+        "/user/forgot-password/reset-password": {
+            "put": {
+                "description": "Reset password after forgot password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Reset password after forgot password",
+                "parameters": [
+                    {
+                        "description": "Reset Password",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ResetPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/forgot-password/verify-otp": {
+            "post": {
+                "description": "Verify OTP and allow user to reset password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Verify OTP for forgot password",
+                "parameters": [
+                    {
+                        "description": "Verify OTP request",
+                        "name": "verifyRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.VerifyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
             "post": {
                 "description": "Login user and return JWT token",
                 "consumes": [
@@ -111,12 +168,12 @@ const docTemplate = `{
                 "summary": "Login user",
                 "parameters": [
                     {
-                        "description": "User object",
+                        "description": "Login credentials",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Users"
+                            "$ref": "#/definitions/models.LoginRequest"
                         }
                     }
                 ],
@@ -124,10 +181,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.LoginResponse"
                         }
                     },
                     "401": {
@@ -142,7 +196,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/logout": {
+        "/user/logout": {
             "post": {
                 "description": "Logout user and clear JWT token",
                 "consumes": [
@@ -165,50 +219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/profile": {
-            "put": {
-                "description": "Update user's profile information",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Update user profile",
-                "parameters": [
-                    {
-                        "description": "User object",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Users"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/users/profile/cookie": {
+        "/user/profile": {
             "get": {
                 "description": "Get user profile using cookie",
                 "consumes": [
@@ -232,7 +243,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/register": {
+        "/user/register": {
             "post": {
                 "description": "Register a new user in the system",
                 "consumes": [
@@ -247,12 +258,12 @@ const docTemplate = `{
                 "summary": "Register a new user",
                 "parameters": [
                     {
-                        "description": "User object",
+                        "description": "Registration details",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Users"
+                            "$ref": "#/definitions/models.RegisterRequest"
                         }
                     }
                 ],
@@ -260,10 +271,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.ResponseWithEmail"
                         }
                     },
                     "400": {
@@ -278,8 +286,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/reset-password": {
-            "post": {
+        "/user/reset-password": {
+            "put": {
                 "description": "Reset user password",
                 "consumes": [
                     "application/json"
@@ -321,7 +329,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/role": {
+        "/user/role/{id}": {
             "put": {
                 "description": "Change the role of a user by admin",
                 "consumes": [
@@ -376,7 +384,50 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/verify-otp": {
+        "/user/update-profile": {
+            "put": {
+                "description": "Update user's profile information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user profile",
+                "parameters": [
+                    {
+                        "description": "User object",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Users"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/verify-otp": {
             "post": {
                 "description": "Verify OTP and finalize user registration",
                 "consumes": [
@@ -422,7 +473,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/user/{id}": {
             "get": {
                 "description": "Get user by ID from the database",
                 "consumes": [
@@ -504,6 +555,47 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "description": "Get user by email from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get a user by email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserGetResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -511,7 +603,56 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                }
+            }
+        },
+        "models.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "yourpassword"
+                }
+            }
+        },
+        "models.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "expire_time": {
                     "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "newuser@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "yourpassword"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "user"
+                },
+                "user_name": {
+                    "type": "string",
+                    "example": "newuser"
                 }
             }
         },
@@ -519,10 +660,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "yournewpassword"
                 }
             }
         },
@@ -572,28 +715,28 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "newuser@example.com"
                 },
                 "id": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "yourpassword"
                 },
                 "role": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user"
                 },
-                "user_id": {
-                    "type": "string"
+                "user_name": {
+                    "type": "string",
+                    "example": "newuser"
                 },
                 "verified_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
                 }
             }
         },
@@ -601,10 +744,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "otp": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "123456"
                 }
             }
         }

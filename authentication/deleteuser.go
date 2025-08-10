@@ -18,7 +18,7 @@ import (
 // @Param id path int true "User ID"
 // @Success 200 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /users/{id} [delete]
+// @Router /user/{id} [delete]
 func DeleteUsers(w http.ResponseWriter, r *http.Request) {
 	ok := config.CheckAdmin(w, r)
 	if !ok {

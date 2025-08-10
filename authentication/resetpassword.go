@@ -21,7 +21,7 @@ import (
 // @Param data body models.ResetPassword true "Reset password data"
 // @Success 200 {object} models.ResponseWithEmail
 // @Failure 400 {object} map[string]string
-// @Router /users/reset-password [post]
+// @Router /user/reset-password [put]
 func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var data models.ResetPassword
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {

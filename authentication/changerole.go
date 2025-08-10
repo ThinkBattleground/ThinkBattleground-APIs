@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
-// @Router /users/role [put]
+// @Router /user/role/{id} [put]
 func ChangeUserRole(w http.ResponseWriter, r *http.Request) {
 	ok := config.CheckAdmin(w, r)
 	if !ok {

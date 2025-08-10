@@ -12,7 +12,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
-// @Router /users/profile/cookie [get]
+// @Router /user/profile [get]
 func GetUserProfileByCookie(w http.ResponseWriter, r *http.Request) {
 	resp := r.Context().Value("user_data")
 	config.WriteResponse(w, http.StatusOK, resp)

@@ -18,7 +18,7 @@ import (
 // @Param user body models.Users true "User object"
 // @Success 200 {object} models.Response
 // @Failure 400 {object} map[string]string
-// @Router /users/profile [put]
+// @Router /user/update-profile [put]
 func UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
 	var user models.Users
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -27,8 +27,8 @@ func UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updateUser := `UPDATE users SET first_name=$1, last_name=$2 WHERE email=$3`
-	_ = config.DB.QueryRow(updateUser, user.FirstName, user.LastName, user.Email)
+	updateUser := `UPDATE users SET user_name=$1 WHERE email=$2`
+	_ = config.DB.QueryRow(updateUser, user.UserName, user.Email)
 
 	resp := models.Response{
 		Message: constants.UPDATE_PROFILE,

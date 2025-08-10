@@ -22,7 +22,7 @@ import (
 // @Param verifyRequest body models.VerifyRequest true "Verify OTP request"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
-// @Router /users/verify-otp [post]
+// @Router /user/verify-otp [post]
 func VerifyOTPHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.VerifyRequest
 
@@ -93,6 +93,16 @@ func VerifyOTPHandler(w http.ResponseWriter, r *http.Request) {
 	config.WriteResponse(w, http.StatusOK, resp)
 }
 
+// VerifyOTPForgotPasswordHandler godoc
+// @Summary Verify OTP for forgot password
+// @Description Verify OTP and allow user to reset password
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param verifyRequest body models.VerifyRequest true "Verify OTP request"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /user/forgot-password/verify-otp [post]
 func VerifyOTPForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.VerifyRequest
 

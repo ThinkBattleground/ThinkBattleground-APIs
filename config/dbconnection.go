@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"thinkbattleground-apis/constants"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -19,15 +20,19 @@ func DbConnection() {
 	}
 
 	url := os.Getenv("URL")
-	DB, err = sql.Open("postgres", url)
-	if err != nil {
-		log.Println("Error While DB Connection: ", err)
-		panic(err)
-	}
-	if err = DB.Ping(); err != nil {
-		log.Println("Error While Ping DB: ", err)
-		panic(err)
+	
+	for i := 0; i < 10; i++ { // retry 10 times
+		DB, err = sql.Open("postgres", url)
+		if err != nil {
+			log.Println("DB connection failed:", err)
+		} else if err = DB.Ping(); err == nil {
+			log.Println("The database connected Successfully!")
+			return
+		}
+
+		log.Println("Retrying DB connection in 3 seconds...")
+		time.Sleep(3 * time.Second)
 	}
 
-	log.Println("The database connected Successfully!")
+	log.Fatal("Could not connect to DB after several attempts:", err)
 }

@@ -3,13 +3,49 @@ definitions:
   models.Email:
     properties:
       email:
+        example: user@example.com
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: yourpassword
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      expire_time:
+        type: string
+      message:
+        type: string
+      token:
+        type: string
+    type: object
+  models.RegisterRequest:
+    properties:
+      email:
+        example: newuser@example.com
+        type: string
+      password:
+        example: yourpassword
+        type: string
+      role:
+        example: user
+        type: string
+      user_name:
+        example: newuser
         type: string
     type: object
   models.ResetPassword:
     properties:
       email:
+        example: user@example.com
         type: string
       password:
+        example: yournewpassword
         type: string
     type: object
   models.Response:
@@ -42,27 +78,31 @@ definitions:
   models.Users:
     properties:
       email:
-        type: string
-      first_name:
+        example: newuser@example.com
         type: string
       id:
-        type: string
-      last_name:
+        example: "123"
         type: string
       password:
+        example: yourpassword
         type: string
       role:
+        example: user
         type: string
-      user_id:
+      user_name:
+        example: newuser
         type: string
       verified_at:
+        example: "2023-01-01T00:00:00Z"
         type: string
     type: object
   models.VerifyRequest:
     properties:
       email:
+        example: user@example.com
         type: string
       otp:
+        example: "123456"
         type: string
     type: object
 host: localhost:8080
@@ -72,30 +112,7 @@ info:
   title: Think Battleground API
   version: "1.0"
 paths:
-  /users:
-    get:
-      consumes:
-      - application/json
-      description: Get all users from the database
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.UserGetResponse'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: List all users
-      tags:
-      - users
-  /users/{id}:
+  /user/{id}:
     delete:
       consumes:
       - application/json
@@ -150,7 +167,7 @@ paths:
       summary: Get a user by ID
       tags:
       - users
-  /users/forgot-password:
+  /user/forgot-password:
     post:
       consumes:
       - application/json
@@ -180,18 +197,18 @@ paths:
       summary: Forgot password
       tags:
       - users
-  /users/login:
-    post:
+  /user/forgot-password/reset-password:
+    put:
       consumes:
       - application/json
-      description: Login user and return JWT token
+      description: Reset password after forgot password
       parameters:
-      - description: User object
+      - description: Reset Password
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.Users'
+          $ref: '#/definitions/models.ResetPassword'
       produces:
       - application/json
       responses:
@@ -201,6 +218,64 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset password after forgot password
+      tags:
+      - users
+  /user/forgot-password/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verify OTP and allow user to reset password
+      parameters:
+      - description: Verify OTP request
+        in: body
+        name: verifyRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Verify OTP for forgot password
+      tags:
+      - users
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
         "401":
           description: Unauthorized
           schema:
@@ -210,7 +285,7 @@ paths:
       summary: Login user
       tags:
       - users
-  /users/logout:
+  /user/logout:
     post:
       consumes:
       - application/json
@@ -225,35 +300,7 @@ paths:
       summary: Logout user
       tags:
       - users
-  /users/profile:
-    put:
-      consumes:
-      - application/json
-      description: Update user's profile information
-      parameters:
-      - description: User object
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/models.Users'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Update user profile
-      tags:
-      - users
-  /users/profile/cookie:
+  /user/profile:
     get:
       consumes:
       - application/json
@@ -269,27 +316,25 @@ paths:
       summary: Get user profile by cookie
       tags:
       - users
-  /users/register:
+  /user/register:
     post:
       consumes:
       - application/json
       description: Register a new user in the system
       parameters:
-      - description: User object
+      - description: Registration details
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.Users'
+          $ref: '#/definitions/models.RegisterRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ResponseWithEmail'
         "400":
           description: Bad Request
           schema:
@@ -299,8 +344,8 @@ paths:
       summary: Register a new user
       tags:
       - users
-  /users/reset-password:
-    post:
+  /user/reset-password:
+    put:
       consumes:
       - application/json
       description: Reset user password
@@ -327,7 +372,7 @@ paths:
       summary: Reset password
       tags:
       - users
-  /users/role:
+  /user/role/{id}:
     put:
       consumes:
       - application/json
@@ -363,7 +408,35 @@ paths:
       summary: Change a user's role
       tags:
       - users
-  /users/verify-otp:
+  /user/update-profile:
+    put:
+      consumes:
+      - application/json
+      description: Update user's profile information
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Users'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user profile
+      tags:
+      - users
+  /user/verify-otp:
     post:
       consumes:
       - application/json
@@ -391,6 +464,33 @@ paths:
               type: string
             type: object
       summary: Verify OTP for registration
+      tags:
+      - users
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get user by email from the database
+      parameters:
+      - description: User Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserGetResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a user by email
       tags:
       - users
 swagger: "2.0"

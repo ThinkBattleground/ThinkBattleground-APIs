@@ -59,7 +59,7 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "User ID"
 // @Success 200 {object} models.UserGetResponse
 // @Failure 404 {object} map[string]string
-// @Router /users/{id} [get]
+// @Router /user/{id} [get]
 func GetUserById(w http.ResponseWriter, r *http.Request) {
 	ok := config.CheckAdmin(w, r)
 	if !ok {
@@ -80,6 +80,16 @@ func GetUserById(w http.ResponseWriter, r *http.Request) {
 	config.WriteResponse(w, http.StatusOK, user)
 }
 
+// FilterUserByEmail godoc
+// @Summary Get a user by email
+// @Description Get user by email from the database
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param email path string true "User Email"
+// @Success 200 {object} models.UserGetResponse
+// @Failure 404 {object} map[string]string
+// @Router /users [get]
 func FilterUserByEmail(w http.ResponseWriter, r *http.Request) {
 	ok := config.CheckAdmin(w, r)
 	if !ok {

@@ -15,7 +15,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} models.Response
-// @Router /users/logout [post]
+// @Router /user/logout [post]
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	email := r.Context().Value("email").(string)
 	http.SetCookie(w, &http.Cookie{

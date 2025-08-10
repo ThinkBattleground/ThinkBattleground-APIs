@@ -21,51 +21,49 @@ import (
 // @Tags users
 // @Accept  json
 // @Produce  json
-// @Param user body models.Users true "User object"
-// @Success 200 {object} map[string]string
+// @Param user body models.LoginRequest true "Login credentials"
+// @Success 200 {object} models.LoginResponse
 // @Failure 401 {object} map[string]string
-// @Router /users/login [post]
+// @Router /user/login [post]
 func LoginUser(w http.ResponseWriter, r *http.Request) {
-	var user models.Users
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var loginReq models.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
 		config.WriteResponse(w, http.StatusBadRequest, constants.INVALID_REQUEST)
 		log.Printf(constants.INVALID_REQUEST+" Error: %s\n", err)
 		return
 	}
 
-	ok := ValidateEmail(w, user.Email)
+	ok := ValidateEmail(w, loginReq.Email)
 	if !ok {
 		return
 	}
 
-	ok = ValidatePassword(w, user.Password)
+	ok = ValidatePassword(w, loginReq.Password)
 	if !ok {
 		return
 	}
 
+	var user models.Users
 	var password string
 
-	userData := `SELECT user_id, first_name, last_name, password, role FROM users WHERE email=$1`
-	err := config.DB.QueryRow(userData, user.Email).Scan(&user.UserId, &user.FirstName, &user.LastName, &password, &user.Role)
+	userData := `SELECT user_name, password, role FROM users WHERE email=$1`
+	err := config.DB.QueryRow(userData, loginReq.Email).Scan(&user.UserName, &password, &user.Role)
 
 	if err != nil {
-		config.WriteResponse(w, http.StatusBadRequest, fmt.Sprintf("User with  %s not exist, please register.", user.Email))
-		log.Printf("User with  %s not exist, please register.\n", user.Email)
+		config.WriteResponse(w, http.StatusBadRequest, fmt.Sprintf("User with  %s not exist, please register.", loginReq.Email))
+		log.Printf("User with  %s not exist, please register.\n", loginReq.Email)
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(user.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(loginReq.Password))
 	if err == nil {
 		expireTime := time.Now().Add(20 * time.Minute)
 		// creating and signing token for defined claims using HS256 method
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"id":         user.UserId,
-			"first_name": user.FirstName,
-			"last_name":  user.LastName,
-			"email":      user.Email,
-			"password":   password,
-			"role":       user.Role,
-			"exp":        expireTime.Unix(),
+			"user_name": user.UserName,
+			"email":     loginReq.Email,
+			"role":      user.Role,
+			"exp":       expireTime.Unix(),
 		})
 		if err := config.LoadEnv(); err != nil {
 			log.Println(constants.LOAD_ENV_ERROR)
@@ -89,7 +87,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		})
 
 		resp := models.LoginResponse{
-			Message:    fmt.Sprintf("User %s logged in successfully! Token Expires within 20 Minutes", user.Email),
+			Message:    fmt.Sprintf("User %s logged in successfully! Token Expires within 20 Minutes", loginReq.Email),
 			Token:      tokenString,
 			ExpireTime: time.Now().Add(20 * time.Minute).Format(time.RFC3339),
 		}

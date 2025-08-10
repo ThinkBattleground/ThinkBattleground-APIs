@@ -21,7 +21,7 @@ import (
 // @Param email body models.Email true "User email"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
-// @Router /users/forgot-password [post]
+// @Router /user/forgot-password [post]
 func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var email models.Email
 
@@ -79,6 +79,16 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	log.Printf(constants.OTP_SENT+"! OTP is : %s", otp)
 }
 
+// ResetPasswordAfterForgotPassword godoc
+// @Summary Reset password after forgot password
+// @Description Reset password after forgot password
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body models.ResetPassword true "Reset Password"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /user/forgot-password/reset-password [put]
 func ResetPasswordAfterForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var data models.ResetPassword
 

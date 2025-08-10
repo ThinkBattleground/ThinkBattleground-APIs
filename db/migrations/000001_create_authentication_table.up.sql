@@ -1,9 +1,7 @@
 -- Create Users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
+    user_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
@@ -12,13 +10,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Create TempUsers table
 CREATE TABLE IF NOT EXISTS temp_users (
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
+    user_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
     otp VARCHAR(255) NOT NULL,
-    otp_expires TIMESTAMP NOT NULL
+    otp_expires TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -27,6 +24,6 @@ CREATE TABLE IF NOT EXISTS forgot_password (
     email VARCHAR(255) NOT NULL,
     otp VARCHAR(255) NOT NULL,
     otp_expires TIMESTAMP NOT NULL,
-    verified BOOLEAN DEFAULT false
+    verified BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
