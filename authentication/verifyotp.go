@@ -9,25 +9,27 @@ import (
 	"thinkbattleground-apis/constants"
 	"thinkbattleground-apis/models"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // VerifyOTPHandler godoc
 // @Summary Verify OTP for registration
 // @Description Verify OTP and finalize user registration
-// @Tags users
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param verifyRequest body models.VerifyRequest true "Verify OTP request"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
+// @Success 201 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 401 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /user/verify-otp [post]
 func VerifyOTPHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.VerifyRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		config.WriteResponse(w, http.StatusBadRequest, constants.INVALID_REQUEST)
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: constants.INVALID_REQUEST,
+		})
 		log.Println(constants.INVALID_REQUEST + err.Error())
 		return
 	}
@@ -38,44 +40,51 @@ func VerifyOTPHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(req.OTP) != 6 {
-		config.WriteResponse(w, http.StatusBadRequest, constants.INVALID_OTP)
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: constants.INVALID_OTP,
+		})
 		log.Println(constants.INVALID_OTP)
 		return
 	}
 
 	// store user details in variables
-	var firstName, lastName, password, role, storedOTP string
+	var userName, password, role, storedOTP string
 	var otpExpiry time.Time
 
-	userData := `SELECT first_name, last_name, password, role, otp, otp_expires FROM temp_users WHERE email = $1`
-	err := config.DB.QueryRow(userData, req.Email).Scan(&firstName, &lastName, &password, &role, &storedOTP, &otpExpiry)
+	userData := `SELECT user_name, password, role, otp, otp_expires FROM temp_users WHERE email = $1`
+	err := config.DB.QueryRow(userData, req.Email).Scan(&userName, &password, &role, &storedOTP, &otpExpiry)
 
 	if err != nil {
-		config.WriteResponse(w, http.StatusUnauthorized, constants.USER_NOT_FOUND+" or "+constants.INVALID_OTP)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: constants.USER_NOT_FOUND + " or " + constants.INVALID_OTP,
+		})
 		log.Println(constants.USER_NOT_FOUND+" or "+constants.INVALID_OTP, err.Error())
 		return
 	}
 
 	if time.Now().After(otpExpiry) {
-		config.WriteResponse(w, http.StatusUnauthorized, constants.OTP_EXPIRED)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: constants.OTP_EXPIRED,
+		})
 		log.Println(constants.OTP_EXPIRED)
 		return
 	}
 
 	if strings.TrimSpace(req.OTP) != storedOTP {
-		config.WriteResponse(w, http.StatusUnauthorized, constants.INVALID_OTP)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: constants.INVALID_OTP,
+		})
 		log.Println(constants.INVALID_OTP)
 		return
 	}
 
-	// Generate a unique UserId
-	userId := uuid.New().String()
-
-	insertUser := `INSERT INTO users (user_id, first_name, last_name, email, password, role, verified_at) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (email) DO UPDATE SET verified_at = $7`
-	_, err = config.DB.Exec(insertUser, userId, firstName, lastName, req.Email, password, role, time.Now())
+	insertUser := `INSERT INTO users (user_name, email, password, role, verified_at) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (email) DO UPDATE SET verified_at = $5`
+	_, err = config.DB.Exec(insertUser, userName, req.Email, password, role, time.Now())
 
 	if err != nil {
-		config.WriteResponse(w, http.StatusInternalServerError, "Failed to finalize registration")
+		config.WriteResponse(w, http.StatusInternalServerError, models.Response{
+			Message: "Failed to finalize registration",
+		})
 		log.Printf("Failed to finalize registration. Error: %s\n", err)
 		return
 	}
@@ -87,27 +96,30 @@ func VerifyOTPHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Failed to delete temp user: %v\n", err)
 	}
 
-	resp := models.Response{
+	config.WriteResponse(w, http.StatusCreated, models.Response{
 		Message: "Email verified successfully. User Registered.",
-	}
-	config.WriteResponse(w, http.StatusOK, resp)
+	})
 }
 
 // VerifyOTPForgotPasswordHandler godoc
 // @Summary Verify OTP for forgot password
 // @Description Verify OTP and allow user to reset password
-// @Tags users
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param verifyRequest body models.VerifyRequest true "Verify OTP request"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
+// @Success 200 {object} models.ResponseWithEmail
+// @Failure 400 {object} models.Response
+// @Failure 401 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /user/forgot-password/verify-otp [post]
 func VerifyOTPForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.VerifyRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		config.WriteResponse(w, http.StatusBadRequest, constants.INVALID_REQUEST)
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: constants.INVALID_REQUEST,
+		})
 		log.Printf(constants.INVALID_REQUEST+" Error: %s\n", err)
 		return
 	}
@@ -118,7 +130,9 @@ func VerifyOTPForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(req.OTP) != 6 {
-		config.WriteResponse(w, http.StatusBadRequest, constants.INVALID_OTP)
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: constants.INVALID_OTP,
+		})
 		log.Println(constants.INVALID_OTP)
 		return
 	}
@@ -131,19 +145,25 @@ func VerifyOTPForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	err := config.DB.QueryRow(userData, req.Email).Scan(&storedOTP, &otpExpiry)
 
 	if err != nil {
-		config.WriteResponse(w, http.StatusUnauthorized, constants.USER_NOT_FOUND+" or "+constants.INVALID_OTP)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: constants.USER_NOT_FOUND + " or " + constants.INVALID_OTP,
+		})
 		log.Println(constants.USER_NOT_FOUND + " or " + constants.INVALID_OTP + err.Error())
 		return
 	}
 
 	if time.Now().After(otpExpiry) {
-		config.WriteResponse(w, http.StatusUnauthorized, constants.OTP_EXPIRED)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: constants.OTP_EXPIRED,
+		})
 		log.Println(constants.OTP_EXPIRED)
 		return
 	}
 
 	if strings.TrimSpace(req.OTP) != storedOTP {
-		config.WriteResponse(w, http.StatusUnauthorized, constants.INVALID_OTP)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: constants.INVALID_OTP,
+		})
 		log.Println(constants.INVALID_OTP)
 		return
 	}
@@ -151,9 +171,8 @@ func VerifyOTPForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	updateUser := `UPDATE forgot_password SET verified=$1 WHERE email=$2`
 	_ = config.DB.QueryRow(updateUser, true, req.Email)
 
-	resp := models.ResponseWithEmail{
+	config.WriteResponse(w, http.StatusOK, models.ResponseWithEmail{
 		Message: "Email verified successfully",
 		Email:   req.Email,
-	}
-	config.WriteResponse(w, http.StatusOK, resp)
+	})
 }

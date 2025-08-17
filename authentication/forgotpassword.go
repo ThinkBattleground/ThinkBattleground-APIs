@@ -15,18 +15,21 @@ import (
 // ForgotPassword godoc
 // @Summary Forgot password
 // @Description Send OTP for password reset
-// @Tags users
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param email body models.Email true "User email"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
+// @Success 200 {object} models.ResponseWithEmail
+// @Failure 400 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /user/forgot-password [post]
 func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var email models.Email
 
 	if err := json.NewDecoder(r.Body).Decode(&email); err != nil {
-		config.WriteResponse(w, http.StatusInternalServerError, constants.INVALID_REQUEST)
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: constants.INVALID_REQUEST,
+		})
 		log.Printf(constants.INVALID_REQUEST+" Error: %s\n", err)
 		return
 	}
@@ -40,10 +43,10 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	otp := config.GenerateOTP()
 	expiration := time.Now().Add(2 * time.Minute)
 
-	var firstName, lastName string
+	var userName string
 
-	userData := `SELECT first_name, last_name from users WHERE email=$1`
-	_ = config.DB.QueryRow(userData, email.Email).Scan(&firstName, &lastName)
+	userData := `SELECT user_name from users WHERE email=$1`
+	_ = config.DB.QueryRow(userData, email.Email).Scan(&userName)
 
 	insertData := `INSERT INTO forgot_password (email, otp, otp_expires) VALUES ($1, $2, $3)`
 	_, err := config.DB.Exec(insertData, email.Email, otp, expiration)
@@ -51,15 +54,19 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	go config.CronSchedule("forgot_password")
 
 	if err != nil {
-		config.WriteResponse(w, http.StatusInternalServerError, "Failed to update password!")
+		config.WriteResponse(w, http.StatusInternalServerError, models.Response{
+			Message: "Failed to update password!",
+		})
 		log.Printf("Error while insert data in database: %s", err)
 		return
 	}
 
 	message := "We received a request to reset your password. Please use the OTP below to proceed:"
 
-	if err := config.SendEmail(email.Email, otp, firstName+" "+lastName, message); err != nil {
-		config.WriteResponse(w, http.StatusInternalServerError, "Failed to send email")
+	if err := config.SendEmail(email.Email, otp, userName, message); err != nil {
+		config.WriteResponse(w, http.StatusInternalServerError, models.Response{
+			Message: "Failed to send email",
+		})
 		log.Printf("Error while send email: %s", err)
 
 		deleteUser := `DELETE FROM forgot_password WHERE email = $1`
@@ -70,30 +77,31 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := models.ResponseWithEmail{
+	config.WriteResponse(w, http.StatusOK, models.ResponseWithEmail{
 		Message: constants.OTP_SENT,
 		Email:   email.Email,
-	}
-
-	config.WriteResponse(w, http.StatusOK, resp)
+	})
 	log.Printf(constants.OTP_SENT+"! OTP is : %s", otp)
 }
 
 // ResetPasswordAfterForgotPassword godoc
 // @Summary Reset password after forgot password
 // @Description Reset password after forgot password
-// @Tags users
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param user body models.ResetPassword true "Reset Password"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response
+// @Failure 401 {object} models.Response
 // @Router /user/forgot-password/reset-password [put]
 func ResetPasswordAfterForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var data models.ResetPassword
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		config.WriteResponse(w, http.StatusBadRequest, constants.INVALID_REQUEST)
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: constants.INVALID_REQUEST,
+		})
 		log.Printf(constants.INVALID_REQUEST+" Error: %s\n", err)
 		return
 	}
@@ -113,13 +121,17 @@ func ResetPasswordAfterForgotPassword(w http.ResponseWriter, r *http.Request) {
 	err := config.DB.QueryRow(verifiedUser, data.Email).Scan(&verified)
 
 	if err != nil {
-		config.WriteResponse(w, http.StatusUnauthorized, constants.USER_NOT_FOUND+" or "+constants.INVALID_OTP)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: constants.USER_NOT_FOUND + " or " + constants.INVALID_OTP,
+		})
 		log.Println(constants.USER_NOT_FOUND + " or " + constants.INVALID_OTP + err.Error())
 		return
 	}
 
 	if !verified {
-		config.WriteResponse(w, http.StatusUnauthorized, "User not verified!"+constants.USER_UNAUTHORIZED)
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: "User not verified!" + constants.USER_UNAUTHORIZED,
+		})
 		log.Println("User not verified!" + constants.USER_UNAUTHORIZED)
 		return
 	}
@@ -134,14 +146,14 @@ func ResetPasswordAfterForgotPassword(w http.ResponseWriter, r *http.Request) {
 	deleteUser := `DELETE FROM forgot_password WHERE email = $1`
 	_, err = config.DB.Exec(deleteUser, data.Email)
 	if err != nil {
-		config.WriteResponse(w, http.StatusBadRequest, "failed to delete user")
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: "failed to delete user",
+		})
 		log.Printf("Failed to delete data from forgot_password: %v\n", err)
 	}
 
-	resp := models.Response{
+	config.WriteResponse(w, http.StatusOK, models.Response{
 		Message: constants.PASSWORD_UPDATE,
-	}
-
-	config.WriteResponse(w, http.StatusOK, resp)
-	log.Printf(constants.PASSWORD_UPDATE)
+	})
+	log.Printf("%s", constants.PASSWORD_UPDATE)
 }

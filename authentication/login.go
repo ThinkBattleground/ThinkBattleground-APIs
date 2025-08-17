@@ -18,17 +18,21 @@ import (
 // LoginUser godoc
 // @Summary Login user
 // @Description Login user and return JWT token
-// @Tags users
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param user body models.LoginRequest true "Login credentials"
 // @Success 200 {object} models.LoginResponse
-// @Failure 401 {object} map[string]string
+// @Failure 400 {object} models.Response
+// @Failure 401 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /user/login [post]
 func LoginUser(w http.ResponseWriter, r *http.Request) {
 	var loginReq models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
-		config.WriteResponse(w, http.StatusBadRequest, constants.INVALID_REQUEST)
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: constants.INVALID_REQUEST,
+		})
 		log.Printf(constants.INVALID_REQUEST+" Error: %s\n", err)
 		return
 	}
@@ -50,7 +54,9 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	err := config.DB.QueryRow(userData, loginReq.Email).Scan(&user.UserName, &password, &user.Role)
 
 	if err != nil {
-		config.WriteResponse(w, http.StatusBadRequest, fmt.Sprintf("User with  %s not exist, please register.", loginReq.Email))
+		config.WriteResponse(w, http.StatusBadRequest, models.Response{
+			Message: fmt.Sprintf("User with  %s not exist, please register.", loginReq.Email),
+		})
 		log.Printf("User with  %s not exist, please register.\n", loginReq.Email)
 		return
 	}
@@ -73,7 +79,9 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		jwtKey := os.Getenv("JWTKEY")
 		tokenString, err := token.SignedString([]byte(jwtKey))
 		if err != nil {
-			config.WriteResponse(w, http.StatusInternalServerError, "Error while setting token")
+			config.WriteResponse(w, http.StatusInternalServerError, models.Response{
+				Message: "Error while setting token",
+			})
 			log.Printf("Error while setting token: %s\n", err)
 			return
 		}
@@ -95,6 +103,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		config.WriteResponse(w, http.StatusOK, resp)
 		fmt.Println("Token : ", tokenString)
 	} else {
-		config.WriteResponse(w, http.StatusUnauthorized, "Invalid Credentials")
+		config.WriteResponse(w, http.StatusUnauthorized, models.Response{
+			Message: "Invalid Credentials",
+		})
 	}
 }

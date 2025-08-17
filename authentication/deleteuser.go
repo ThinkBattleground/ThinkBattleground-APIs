@@ -12,12 +12,12 @@ import (
 // DeleteUsers godoc
 // @Summary Delete user
 // @Description Delete a user by ID
-// @Tags users
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
-// @Success 200 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Success 200 {object} models.Response
+// @Failure 500 {object} models.Response
 // @Router /user/{id} [delete]
 func DeleteUsers(w http.ResponseWriter, r *http.Request) {
 	ok := config.CheckAdmin(w, r)
@@ -31,12 +31,14 @@ func DeleteUsers(w http.ResponseWriter, r *http.Request) {
 	deleteUser := `DELETE FROM users WHERE id = $1`
 	_, err := config.DB.Exec(deleteUser, id)
 	if err != nil {
+		config.WriteResponse(w, http.StatusInternalServerError, models.Response{
+			Message: "Failed to delete user",
+		})
 		log.Printf("Failed to delete data from user: %v\n", err)
+		return
 	}
 
-	resp := models.Response{
+	config.WriteResponse(w, http.StatusOK, models.Response{
 		Message: "User deleted successfully",
-	}
-
-	config.WriteResponse(w, http.StatusOK, resp)
+	})
 }

@@ -1,6 +1,9 @@
 # Use official Golang image as the base
 FROM golang:1.24-alpine
 
+# Install CA certificates for TLS verification
+RUN apk --no-cache add ca-certificates && update-ca-certificates
+
 # Set working directory
 WORKDIR /app
 

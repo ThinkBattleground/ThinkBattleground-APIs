@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Forgot password",
                 "parameters": [
@@ -43,19 +43,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.ResponseWithEmail"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -71,7 +71,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Reset password after forgot password",
                 "parameters": [
@@ -89,19 +89,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -117,7 +117,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Verify OTP for forgot password",
                 "parameters": [
@@ -135,19 +135,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.ResponseWithEmail"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -163,7 +169,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Login user",
                 "parameters": [
@@ -184,13 +190,22 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.LoginResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -206,7 +221,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Logout user",
                 "responses": {
@@ -229,7 +244,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Get user profile by cookie",
                 "responses": {
@@ -253,7 +268,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Register a new user",
                 "parameters": [
@@ -268,8 +283,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.ResponseWithEmail"
                         }
@@ -277,10 +292,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -296,7 +314,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Reset password",
                 "parameters": [
@@ -320,10 +338,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -339,7 +354,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Change a user's role",
                 "parameters": [
@@ -357,28 +372,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -394,7 +394,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Update user profile",
                 "parameters": [
@@ -418,10 +418,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -437,7 +434,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Verify OTP for registration",
                 "parameters": [
@@ -452,22 +449,28 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -483,7 +486,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Get a user by ID",
                 "parameters": [
@@ -502,13 +505,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.UserGetResponse"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -522,7 +522,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Delete user",
                 "parameters": [
@@ -538,19 +538,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -566,32 +560,31 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
                 "summary": "Get a user by email",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User Email",
+                        "description": "User Email (optional)",
                         "name": "email",
-                        "in": "path",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.UserGetResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.UserGetResponse"
+                            }
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Response"
                         }
                     }
                 }
@@ -694,19 +687,13 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "first_name": {
-                    "type": "string"
-                },
                 "id": {
-                    "type": "string"
-                },
-                "last_name": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "user_id": {
+                "user_name": {
                     "type": "string"
                 }
             }
@@ -753,7 +740,19 @@ const docTemplate = `{
                 }
             }
         }
-    }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "BearerAuth": []
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/smtp"
@@ -46,10 +47,12 @@ func SendEmail(to, otp, username, message string) error {
 
 	emailBody := body.String()
 
-	from := os.Getenv("EMAIL_USER_FROM")
-	password := os.Getenv("EMAIL_USER_PASSWORD")
-	smtpHost := os.Getenv("EMAIL_SMTP_HOST")
-	smtpPort := os.Getenv("EMAIL_SMTP_PORT")
+	from := os.Getenv("FROM_EMAIL")
+	password := os.Getenv("SMTP_PASSWORD")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+
+	log.Println(from, password, smtpHost, smtpPort)
 
 	msg := "From: " + from + "\n" +
 		"To: " + to + "\n" +
@@ -59,5 +62,42 @@ func SendEmail(to, otp, username, message string) error {
 		emailBody
 
 	auth := smtp.PlainAuth("", from, password, smtpHost)
-	return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, []byte(msg))
+
+	// Connect to the SMTP server
+	client, err := smtp.Dial(smtpHost + ":" + smtpPort)
+	if err != nil {
+		return fmt.Errorf("failed to connect to SMTP server: %w", err)
+	}
+	defer client.Close()
+
+	// Set up TLS configuration
+	if err := client.StartTLS(&tls.Config{
+		InsecureSkipVerify: true,
+	}); err != nil {
+		return fmt.Errorf("failed to start TLS: %w", err)
+	}
+
+	if err := client.Auth(auth); err != nil {
+		return fmt.Errorf("failed to authenticate: %w", err)
+	}
+
+	if err := client.Mail(from); err != nil {
+		return fmt.Errorf("failed to set sender: %w", err)
+	}
+
+	if err := client.Rcpt(to); err != nil {
+		return fmt.Errorf("failed to set recipient: %w", err)
+	}
+
+	wc, err := client.Data()
+	if err != nil {
+		return fmt.Errorf("failed to send data: %w", err)
+	}
+	defer wc.Close()
+
+	if _, err := wc.Write([]byte(msg)); err != nil {
+		return fmt.Errorf("failed to write message: %w", err)
+	}
+
+	return nil
 }

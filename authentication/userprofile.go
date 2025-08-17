@@ -8,7 +8,7 @@ import (
 // GetUserProfileByCookie godoc
 // @Summary Get user profile by cookie
 // @Description Get user profile using cookie
-// @Tags users
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
