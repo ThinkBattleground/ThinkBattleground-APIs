@@ -1,0 +1,494 @@
+basePath: /api/v1
+definitions:
+  models.Email:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: yourpassword
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      expire_time:
+        type: string
+      message:
+        type: string
+      token:
+        type: string
+    type: object
+  models.RegisterRequest:
+    properties:
+      email:
+        example: newuser@example.com
+        type: string
+      password:
+        example: yourpassword
+        type: string
+      role:
+        example: user
+        type: string
+      user_name:
+        example: newuser
+        type: string
+    type: object
+  models.ResetPassword:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: yournewpassword
+        type: string
+    type: object
+  models.Response:
+    properties:
+      message:
+        type: string
+    type: object
+  models.ResponseWithEmail:
+    properties:
+      email:
+        type: string
+      message:
+        type: string
+    type: object
+  models.UserGetResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      user_name:
+        type: string
+    type: object
+  models.Users:
+    properties:
+      email:
+        example: newuser@example.com
+        type: string
+      id:
+        example: "123"
+        type: string
+      password:
+        example: yourpassword
+        type: string
+      role:
+        example: user
+        type: string
+      user_name:
+        example: newuser
+        type: string
+      verified_at:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+    type: object
+  models.VerifyRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      otp:
+        example: "123456"
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is my sample API with Gorilla Mux
+  title: Think Battleground API
+  version: "1.0"
+paths:
+  /user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Get user by ID from the database
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserGetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get a user by ID
+      tags:
+      - Users
+  /user/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Send OTP for password reset
+      parameters:
+      - description: User email
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/models.Email'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithEmail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Forgot password
+      tags:
+      - Users
+  /user/forgot-password/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Reset password after forgot password
+      parameters:
+      - description: Reset Password
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResetPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Reset password after forgot password
+      tags:
+      - Users
+  /user/forgot-password/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verify OTP and allow user to reset password
+      parameters:
+      - description: Verify OTP request
+        in: body
+        name: verifyRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithEmail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Verify OTP for forgot password
+      tags:
+      - Users
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Login user
+      tags:
+      - Users
+  /user/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout user and clear JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Logout user
+      tags:
+      - Users
+  /user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get user profile using cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user profile by cookie
+      tags:
+      - Users
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user in the system
+      parameters:
+      - description: Registration details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithEmail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Register a new user
+      tags:
+      - Users
+  /user/reset-password:
+    put:
+      consumes:
+      - application/json
+      description: Reset user password
+      parameters:
+      - description: Reset password data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResetPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithEmail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Reset password
+      tags:
+      - Users
+  /user/role/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Change the role of a user by admin
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Users'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Change a user's role
+      tags:
+      - Users
+  /user/update-profile:
+    put:
+      consumes:
+      - application/json
+      description: Update user's profile information
+      parameters:
+      - description: User object
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.Users'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Update user profile
+      tags:
+      - Users
+  /user/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verify OTP and finalize user registration
+      parameters:
+      - description: Verify OTP request
+        in: body
+        name: verifyRequest
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Verify OTP for registration
+      tags:
+      - Users
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get user by email from the database
+      parameters:
+      - description: User Email (optional)
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserGetResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get a user by email
+      tags:
+      - Users
+security:
+- BearerAuth: []
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
